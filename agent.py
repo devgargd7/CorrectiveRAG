@@ -6,15 +6,15 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 
 class AgentHelper:
 
-  def __init__(self, yaml_config_reader):
+  def __init__(self, model, yaml_config_reader):
      self.yaml_config_reader = yaml_config_reader 
+     self.model = model 
 
   def get_llm(self, model, format="json", temperature=0):
       return ChatOllama(model=model, format=format, temperature=temperature)
 
   def create_agent(self, prompt_template, output_parser):
-      model = self.yaml_config_reader.get("model")
-      llm = self.get_llm(model, format="json" if isinstance(output_parser, JsonOutputParser) else None)
+      llm = self.get_llm(self.model, format="json" if isinstance(output_parser, JsonOutputParser) else None)
       return prompt_template | llm | output_parser
 
   def format_docs(docs):

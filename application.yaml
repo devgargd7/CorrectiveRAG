@@ -1,8 +1,8 @@
 model: 'llama3'
 collection_name: "rag-chroma"
 embedding_model: "nomic-embed-text-v1.5"
-api_key: <langchain-api-key>
-TAVILY_API_KEY: <travily-api-key>
+api_key: <t>
+TAVILY_API_KEY: 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
 
 prompt_templates:
   retrieval_grader: |
