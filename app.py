@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit_chat import message
 from rag_app import App
 
-st.set_page_config(page_title="ChatPDF")
+st.set_page_config(page_title="Chat")
 
 def display_messages():
     print("---DISPLAY MSGS---")
@@ -28,10 +28,22 @@ def process_input():
         st.session_state["messages"].append((user_text, True))
         st.session_state["messages"].append((value["generation"], False))
 
+def process_url():
+    print("---PROCESS URL---")
+    st.session_state["assistant"].clear()
+    st.session_state["messages"] = []
+    st.session_state["user_input"] = ""
+    if st.session_state["url_input"] and len(st.session_state["url_input"].strip()) > 0:
+        url = st.session_state["url_input"].strip()
+        print("url:", url)
+        with st.session_state["ingestion_spinner"], st.spinner(f"Ingesting"):
+            st.session_state["assistant"].ingest(urls=[url])
+
 def read_and_save_file():
     st.session_state["assistant"].clear()
     st.session_state["messages"] = []
     st.session_state["user_input"] = ""
+    st.session_state["url_input"] = ""
 
     for file in st.session_state["file_uploader"]:
         with tempfile.NamedTemporaryFile(delete=False) as tf:
@@ -58,6 +70,7 @@ def page():
         label_visibility="collapsed",
         accept_multiple_files=True,
     )
+    st.text_input("Enter an URL", key="url_input", on_change=process_url)
 
     st.session_state["ingestion_spinner"] = st.empty()
     display_messages()

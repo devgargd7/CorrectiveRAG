@@ -2,7 +2,7 @@ model: 'llama3'
 collection_name: "rag-chroma"
 embedding_model: "nomic-embed-text-v1.5"
 api_key: <t>
-TAVILY_API_KEY: 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
+TAVILY_API_KEY: <>
 
 prompt_templates:
   retrieval_grader: |
