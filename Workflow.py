@@ -210,8 +210,9 @@ class Workflow:
 
         # Web search
         docs = self.web_search_tool.invoke({"query": question})
-        web_results = "\n".join([d["content"] for d in docs])
-        web_results = Document(page_content=web_results)
+        # Not needed in Google Search
+        # docs = "\n".join([d["content"] for d in docs])
+        web_results = Document(page_content=docs)
         if documents is not None:
             documents.append(web_results)
         else:

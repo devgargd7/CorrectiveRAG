@@ -142,7 +142,9 @@ result = evaluate(
     llm=eval_llm,
     embeddings=eval_embd,
 )
-print(f"Result for the chain: {result}, average time elapsed: {end-start}")
+print(
+    f"Result for the chain: {result}, average time elapsed: {(end-start)/len(QUESTIONS)}"
+)
 
 
 print("Evaluation: ----RAG Chain----")
