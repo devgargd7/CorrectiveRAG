@@ -22,7 +22,7 @@ from tqdm.auto import tqdm
 from rag_app import App
 from yaml_reader import YamlConfigReader
 
-EVAL_EMBEDDING_MODELS = ["nomic-embed-text-v1.5"]
+EVAL_EMBEDDING_MODELS = ["llama3"]
 YAML_FILE_PATH = "application.yaml"
 
 yaml_config_reader = YamlConfigReader(YAML_FILE_PATH)

@@ -1,13 +1,35 @@
-from typing import List
-from langchain_core.documents import Document
-from typing_extensions import TypedDict
-from langgraph.graph import END, StateGraph
 import logging
+from typing import List
+
+from langchain_core.documents import Document
+from langgraph.graph import END, StateGraph
+from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
 
 class Workflow:
+    """
+    This class represents a workflow for processing information retrieval tasks.
+    It takes a set of tools and models and builds a state graph to execute them
+    in a specific order based on the results of previous steps.
+
+    Args:
+        retriever (object): An object responsible for retrieving documents from a vector store.
+        docs (list[Document], optional): A list of documents to process (used for summaries).
+        Defaults to None.
+        summary_chain (object): An object responsible for generating summaries of documents.
+        rag_chain (object): An object responsible for generating answers using retrieved documents.
+        retrieval_grader (object): An object responsible for grading the relevance of retrieved
+        documents.
+        hallucination_grader (object): An object responsible for checking if the generated answer
+        is grounded in the documents.
+        answer_grader (object): An object responsible for checking if the generated answer addresses
+        the question.
+        web_search_tool (object): An object responsible for searching the web for relevant
+        information.
+    """
+
     def __init__(
         self,
         retriever,
@@ -17,7 +39,6 @@ class Workflow:
         retrieval_grader,
         hallucination_grader,
         answer_grader,
-        question_router,
         web_search_tool,
     ):
         self.retriever = retriever
@@ -25,13 +46,18 @@ class Workflow:
         self.retrieval_grader = retrieval_grader
         self.hallucination_grader = hallucination_grader
         self.answer_grader = answer_grader
-        self.question_router = question_router
         self.web_search_tool = web_search_tool
         self.docs = docs
         self.summary_chain = summary_chain
         # return self.build()
 
     def build(self):
+        """
+        Builds a state graph representing the workflow for processing information retrieval tasks.
+
+        Returns:
+            StateGraph: A compiled state graph object.
+        """
         workflow = StateGraph(self.GraphState)
         workflow.add_node("websearch", self.web_search)
         workflow.add_node("retrieve", self.retrieve)
@@ -112,6 +138,15 @@ class Workflow:
         }
 
     def init_rag(self, state):
+        """
+        Initialize the RAG chain
+
+        Args:
+            state (dict): The current graph state
+
+        Returns:
+            state (dict): Initialized elements to state
+        """
         return state
 
     def generate(self, state):
@@ -224,29 +259,22 @@ class Workflow:
             "count": state["count"],
         }
 
-    ### Conditional edge
-    def route_question(self, state):
+    def route_chain(self, state):
         """
-        Route question to web search or RAG.
+        Routes the workflow execution based on the current question in the state.
+
+        This method checks the question in the state and determines the appropriate entry
+        point for the workflow.
+        If the question is "summary", the workflow execution starts at the "summary"
+        node. Otherwise,
+        it starts at the "rag" node.
 
         Args:
-            state (dict): The current graph state
+            state (GraphState): The current state of the workflow.
 
         Returns:
-            str: Next node to call
+            str: The name of the node to start execution at ("summary" or "rag").
         """
-
-        logger.info("---ROUTE QUESTION---")
-        question = state["question"]
-        source = self.question_router.invoke({"question": question})
-        if source["datasource"] == "web_search":
-            logger.info("---ROUTE QUESTION TO WEB SEARCH---")
-            return "websearch"
-        elif source["datasource"] == "vectorstore":
-            logger.info("---ROUTE QUESTION TO RAG---")
-            return "vectorstore"
-
-    def route_chain(self, state):
         logger.info("---ROUTE CHAIN---")
         question = state["question"]
         if question == "summary":
